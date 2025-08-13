@@ -23,28 +23,10 @@ router.get('/', eventsController.getEvents);
 // Get single event by ID
 router.get('/:id', eventsController.getEventById);
 
-// Handle preflight for image endpoint
-router.options('/image/:fileId', (req, res) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.status(200).end();
-});
-
-// Get event image by fileId with CORS headers
+// Image endpoint (CORS handled globally)
+router.options('/image/:fileId', (req, res) => res.sendStatus(200));
 router.get('/image/:fileId', (req, res, next) => {
-  // Set CORS headers
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Expose-Headers', 'Content-Type, Content-Length, Content-Disposition');
-  
-  // Handle preflight
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-  
-  // Proceed to the controller
+  res.setHeader('Access-Control-Expose-Headers', 'Content-Type, Content-Length, Content-Disposition');
   eventsController.getEventImage(req, res, next);
 });
 

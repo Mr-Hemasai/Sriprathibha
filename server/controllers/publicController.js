@@ -72,8 +72,7 @@ exports.getSyllabusByClassAndTerm = async (req, res) => {
         'Content-Length': fileBuffer.length,
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
-        'Expires': '0',
-        'Access-Control-Allow-Origin': '*'
+        'Expires': '0'
       });
       
       // Send the file buffer

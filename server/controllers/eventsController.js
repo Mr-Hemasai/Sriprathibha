@@ -321,7 +321,8 @@ exports.getEvents = async (req, res) => {
       docs: events.docs.map(event => {
         const eventObj = event.toObject ? event.toObject() : event;
         if (event.fileId) {
-          eventObj.imageUrl = `${process.env.BASE_URL || 'http://localhost:3000'}/api/events/image/${event.fileId}`;
+          const base = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+          eventObj.imageUrl = `${base}/api/events/image/${event.fileId}`;
         }
         return eventObj;
       })
@@ -399,10 +400,6 @@ exports.getEventImage = async (req, res) => {
       return res.end();
     }
     
-    // Set error response headers
-    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    
     // Handle specific error types
     if (error.message === 'File not found') {
       return res.status(404).json({
@@ -424,10 +421,11 @@ exports.getEventImage = async (req, res) => {
 exports.debugEvents = async (req, res) => {
   try {
     const events = await Event.find({}).sort({ date: -1 }).lean();
+    const base = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
     const eventsWithUrls = events.map(event => ({
       ...event,
       imageUrl: event.fileId 
-        ? `${process.env.BASE_URL || 'http://localhost:3000'}/api/events/image/${event.fileId}`
+        ? `${base}/api/events/image/${event.fileId}`
         : null
     }));
     

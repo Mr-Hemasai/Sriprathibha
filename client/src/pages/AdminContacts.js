@@ -153,12 +153,9 @@ const AdminContacts = () => {
     }
     
     try {
-      // First, try with the full URL to ensure we're hitting the right endpoint
-      const apiUrl = `${process.env.REACT_APP_API_URL || 'http://localhost:3000'}/api/contact/${id}`;
-      console.log('Sending PATCH request to:', apiUrl);
-      
+      console.log('Sending PATCH request to:', `/api/contact/${id}`);
       const response = await axiosInstance.patch(
-        apiUrl,
+        `/api/contact/${id}`,
         { status },
         {
           headers: {
@@ -245,10 +242,8 @@ const AdminContacts = () => {
     setDeleteModal(prev => ({ ...prev, isDeleting: true }));
     
     try {
-      const apiUrl = `${process.env.REACT_APP_API_URL || 'http://localhost:3000'}/api/contact/${contactId}`;
-      console.log('Sending DELETE request to:', apiUrl);
-      
-      const response = await axiosInstance.delete(apiUrl, {
+      console.log('Sending DELETE request to:', `/api/contact/${contactId}`);
+      const response = await axiosInstance.delete(`/api/contact/${contactId}`, {
         withCredentials: true,
         headers: {
           'Content-Type': 'application/json',

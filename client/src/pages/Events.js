@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/axiosInstance';
 import { FaCalendarAlt, FaSearch, FaMapMarkerAlt, FaClock } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
@@ -18,13 +18,7 @@ const Events = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/events', {
-          withCredentials: true, // Include cookies in the request
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
-        });
+        const response = await api.get('/events');
         const sortedEvents = (response.data.data || []).sort((a, b) => 
           new Date(a.date) - new Date(b.date)
         );

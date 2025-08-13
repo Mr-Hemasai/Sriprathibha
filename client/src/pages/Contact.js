@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api/axiosInstance';
 import { FaEnvelope, FaPhoneAlt, FaMapMarkerAlt } from 'react-icons/fa';
 
 const Contact = () => {
@@ -26,7 +26,7 @@ const Contact = () => {
     setSuccess('');
     console.log('Submitting contact form data:', formData);
     try {
-      await axios.post('http://localhost:3000/api/contact', formData);
+      await api.post('/contact', formData);
       setSuccess('✅ Your message has been sent successfully!');
       setFormData({ name: '', email: '', message: '', mobile: '' });
     } catch (error) {
