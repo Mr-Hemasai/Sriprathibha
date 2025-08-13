@@ -25,6 +25,7 @@ const AdminLayout = () => {
     { title: 'Dashboard', path: '/admin', icon: <FaTachometerAlt /> },
     { title: 'Syllabus', path: '/admin/syllabus', icon: <FaBook /> },
     { title: 'Events', path: '/admin/events', icon: <FaCalendarAlt /> },
+    { title: 'Teachers', path: '/admin/teachers', icon: <FaUsers /> },
     { title: 'Applications', path: '/admin/applications', icon: <FaUserGraduate /> },
     { title: 'Contacts', path: '/admin/contacts', icon: <FaUsers /> },
   ];

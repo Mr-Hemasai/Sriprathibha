@@ -17,6 +17,7 @@ import AdminSyllabus from './pages/AdminSyllabus';
 import AdminEvents from './pages/AdminEvents';
 import AdminApplications from './pages/AdminApplications';
 import AdminContacts from './pages/AdminContacts';
+import AdminTeachers from './pages/AdminTeachers';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -57,6 +58,7 @@ function App() {
             <Route path="events" element={<AdminEvents />} />
             <Route path="applications" element={<AdminApplications />} />
             <Route path="contacts" element={<AdminContacts />} />
+            <Route path="teachers" element={<AdminTeachers />} />
           </Route>
 
           {/* Public Routes */}

@@ -63,19 +63,39 @@ const getFileById = (fileId) => {
   });
 };
 
-// Delete file from GridFS by ID
+// Delete file from GridFS by ID (safe if already missing)
 const deleteFileById = (fileId) => {
-  return new Promise((resolve, reject) => {
-    const bucket = gridFSBucket || initGridFS().gridFSBucket;
-    
-    bucket.delete(new mongoose.Types.ObjectId(fileId), (error) => {
-      if (error) {
-        console.error('Error deleting file from GridFS:', error);
-        reject(error);
-      } else {
-        resolve(true);
+  return new Promise(async (resolve, reject) => {
+    try {
+      const bucket = gridFSBucket || initGridFS().gridFSBucket;
+      const _id = new mongoose.Types.ObjectId(fileId);
+      // Pre-check if file exists to avoid MongoRuntimeError
+      const cursor = bucket.find({ _id });
+      const files = await cursor.toArray();
+      if (!files || files.length === 0) {
+        // Nothing to delete
+        return resolve(true);
       }
-    });
+      // Perform deletion and catch callback errors
+      bucket.delete(_id, (error) => {
+        if (error) {
+          console.error('Error deleting file from GridFS:', error);
+          // Treat "File not found" as non-fatal
+          if ((error.message || '').includes('File not found')) {
+            return resolve(true);
+          }
+          return reject(error);
+        }
+        return resolve(true);
+      });
+    } catch (err) {
+      // If error indicates missing file, resolve gracefully
+      if ((err.message || '').includes('File not found')) {
+        return resolve(true);
+      }
+      console.error('deleteFileById unexpected error:', err);
+      return reject(err);
+    }
   });
 };
 

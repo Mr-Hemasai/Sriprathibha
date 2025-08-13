@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
   FaBook, FaCalendarAlt, FaUserGraduate, 
-  FaEnvelopeOpenText, FaArrowUp, FaArrowDown
+  FaEnvelopeOpenText, FaArrowUp, FaArrowDown, FaChalkboardTeacher
 } from 'react-icons/fa';
 import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from '../api/axiosInstance';
@@ -73,6 +73,15 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useContext(AuthContext);
 
+  // Memoized error handler to avoid re-creating on each render
+  const handleError = useCallback((err) => {
+    console.error('API Error:', err);
+    if (err.response?.status === 401) {
+      navigate('/admin/login');
+    }
+    return { data: {} };
+  }, [navigate]);
+
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/admin/login');
@@ -127,15 +136,7 @@ const AdminDashboard = () => {
     };
 
     fetchData();
-  }, [handleError, stats.admissions, stats.contacts, stats.events, stats.syllabus, isAuthenticated, navigate]);
-
-  const handleError = (err) => {
-    console.error('API Error:', err);
-    if (err.response?.status === 401) {
-      navigate('/admin/login');
-    }
-    return { data: {} };
-  };
+  }, [isAuthenticated, navigate, handleError]);
 
   const quickActions = [
     {
@@ -158,6 +159,13 @@ const AdminDashboard = () => {
       icon: <FaUserGraduate />,
       to: '/admin/applications',
       color: 'text-green-600 bg-green-50',
+    },
+    {
+      title: 'Add New Teacher',
+      description: 'Create a teacher profile with photo and details',
+      icon: <FaChalkboardTeacher />,
+      to: '/admin/teachers',
+      color: 'text-pink-600 bg-pink-50',
     },
   ];
 

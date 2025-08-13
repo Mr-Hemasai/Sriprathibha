@@ -154,8 +154,17 @@ exports.deleteSyllabus = async (req, res) => {
       return res.status(404).json({ message: 'Syllabus not found', type: 'error' });
     }
 
-    // Delete file from GridFS
-    await deleteFileById(syllabus.fileId);
+    // Delete file from GridFS (ignore if already missing)
+    try {
+      await deleteFileById(syllabus.fileId);
+    } catch (err) {
+      const msg = err?.message || '';
+      if (msg.includes('File not found')) {
+        console.warn(`GridFS file already missing for id ${syllabus.fileId}; continuing delete.`);
+      } else {
+        throw err;
+      }
+    }
     
     // Delete from database
     await Syllabus.findByIdAndDelete(req.params.id);

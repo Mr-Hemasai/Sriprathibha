@@ -6,7 +6,6 @@ import axiosInstance from '../api/axiosInstance';
 const AdminSyllabus = () => {
   const navigate = useNavigate();
   const [selectedClass, setSelectedClass] = useState('');
-  const [selectedTerm, setSelectedTerm] = useState('1');
   const [file, setFile] = useState(null);
   const [message, setMessage] = useState({ text: '', type: '' });
   const [isUploading, setIsUploading] = useState(false);
@@ -95,7 +94,8 @@ const AdminSyllabus = () => {
 
     const formData = new FormData();
     formData.append('class', selectedClass);
-    formData.append('term', selectedTerm);
+    // Force single-term model: always use term=1 on backend
+    formData.append('term', '1');
     if (file) {
       formData.append('file', file);
     }
@@ -120,8 +120,8 @@ const AdminSyllabus = () => {
       
       setMessage({ 
         text: editingSyllabus 
-          ? `Syllabus for Class ${selectedClass} (Term ${selectedTerm}) updated successfully!`
-          : `Syllabus for Class ${selectedClass} (Term ${selectedTerm}) uploaded successfully!`,
+          ? `Syllabus for Class ${selectedClass} updated successfully!`
+          : `Syllabus for Class ${selectedClass} uploaded successfully!`,
         type: 'success' 
       });
       
@@ -181,14 +181,12 @@ const AdminSyllabus = () => {
   const handleEdit = (syllabus) => {
     setEditingSyllabus(syllabus);
     setSelectedClass(syllabus.class.toString());
-    setSelectedTerm(syllabus.term.toString());
     setShowForm(true);
   };
 
   const resetForm = () => {
     setFile(null);
     setSelectedClass('');
-    setSelectedTerm('1');
     setEditingSyllabus(null);
     setShowForm(false);
     const fileInput = document.getElementById('file-upload');
@@ -256,23 +254,7 @@ const AdminSyllabus = () => {
                   </div>
                 </div>
                 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Term</label>
-                  <div className="relative">
-                    <select
-                      value={selectedTerm}
-                      onChange={(e) => setSelectedTerm(e.target.value)}
-                      className="appearance-none w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      required
-                    >
-                      <option value="1">Term 1</option>
-                      <option value="2">Term 2</option>
-                    </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                      <FaChevronDown className="fill-current h-4 w-4" />
-                    </div>
-                  </div>
-                </div>
+                {/* Term selection removed: single PDF per class */}
               </div>
               
               <div>
@@ -345,7 +327,7 @@ const AdminSyllabus = () => {
                   ) : (
                     <>
                       <FaFileUpload className="text-lg" />
-                      Upload Syllabus for Class {selectedClass || '...'} (Term {selectedTerm})
+                      Upload Syllabus for Class {selectedClass || '...'}
                     </>
                   )}
                 </button>
@@ -375,7 +357,6 @@ const AdminSyllabus = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Term</th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File</th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
@@ -385,9 +366,6 @@ const AdminSyllabus = () => {
                     <tr key={syllabus._id}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         Class {syllabus.class}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        Term {syllabus.term}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <button

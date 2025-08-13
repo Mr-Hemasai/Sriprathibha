@@ -21,6 +21,21 @@ const initGridFS = () => {
   return { gfs, gridFSBucket };
 };
 
+// Open a readable stream for a GridFS file and return file info
+const getFileStreamById = async (fileId) => {
+  if (!gridFSBucket) {
+    initGridFS();
+  }
+  const _id = new mongoose.Types.ObjectId(fileId);
+  const files = await gridFSBucket.find({ _id }).toArray();
+  if (!files || files.length === 0) {
+    throw new Error('File not found');
+  }
+  const file = files[0];
+  const stream = gridFSBucket.openDownloadStream(_id);
+  return { stream, file };
+};
+
 // Upload file to GridFS
 const uploadFile = (fileBuffer, options) => {
   if (!gridFSBucket) {
@@ -48,7 +63,7 @@ const uploadFile = (fileBuffer, options) => {
   });
 };
 
-// Get file from GridFS by ID
+// Get entire file buffer from GridFS by ID (legacy usage)
 const getFileById = (fileId) => {
   if (!gridFSBucket) {
     initGridFS();
@@ -102,6 +117,7 @@ module.exports = {
   initGridFS,
   uploadFile,
   getFileById,
+  getFileStreamById,
   deleteFileById,
   gfs: () => gfs,
   gridFSBucket: () => gridFSBucket

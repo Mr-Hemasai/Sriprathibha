@@ -1,8 +1,26 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaBookOpen, FaFileDownload, FaCheckCircle, FaChevronDown } from 'react-icons/fa';
+import axiosInstance from '../api/axiosInstance';
 
 const Academics = () => {
   const [selectedClass, setSelectedClass] = useState('');
+  const [teachers, setTeachers] = useState([]);
+  const [teachersLoading, setTeachersLoading] = useState(false);
+
+  useEffect(() => {
+    const loadTeachers = async () => {
+      try {
+        setTeachersLoading(true);
+        const res = await axiosInstance.get('/public/teachers');
+        setTeachers(res.data?.data || []);
+      } catch (e) {
+        console.error('Failed to load teachers', e);
+      } finally {
+        setTeachersLoading(false);
+      }
+    };
+    loadTeachers();
+  }, []);
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white px-4 py-12 sm:px-6 lg:px-8">
       {/* Hero Section */}
@@ -46,47 +64,36 @@ const Academics = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {[1, 2].map((term) => (
-            <button
-              key={term}
-              onClick={async (e) => {
-                e.preventDefault();
-                if (!selectedClass) return;
-                
-                try {
-                  console.log(`Fetching syllabus for class ${selectedClass}, term ${term}`);
-                  
-                  // Use the full URL to avoid any proxy issues
-                  const apiUrl = `http://localhost:3000/api/public/syllabus/class/${selectedClass}/term/${term}`;
-                  console.log('API URL:', apiUrl);
-                  
-                  // Method 1: Direct window.open as fallback
-                  window.open(apiUrl, '_blank');
-                  
-                  // Method 2: Create a form and submit it (works in most browsers)
-                  const form = document.createElement('form');
-                  form.method = 'GET';
-                  form.action = apiUrl;
-                  form.target = '_blank';
-                  document.body.appendChild(form);
-                  form.submit();
-                  document.body.removeChild(form);
-                  
-                } catch (error) {
-                  console.error('Error downloading syllabus:', error);
-                  alert(`Error downloading syllabus: ${error.message}`);
-                }
-              }}
-              className={`flex items-center justify-center gap-3 bg-blue-600 text-white px-6 py-4 rounded-lg font-semibold shadow-lg hover:bg-blue-700 transition-all transform hover:-translate-y-1 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-blue-300 ${
-                !selectedClass ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-              disabled={!selectedClass}
-            >
-              <FaFileDownload size={18} />
-              Download Term {term} Syllabus
-            </button>
-          ))}
+        <div className="grid grid-cols-1 gap-4">
+          <button
+            onClick={async (e) => {
+              e.preventDefault();
+              if (!selectedClass) return;
+              try {
+                const apiUrl = `http://localhost:3000/api/public/syllabus/class/${selectedClass}/term/1`;
+                // Direct open
+                window.open(apiUrl, '_blank');
+                // Fallback form submit
+                const form = document.createElement('form');
+                form.method = 'GET';
+                form.action = apiUrl;
+                form.target = '_blank';
+                document.body.appendChild(form);
+                form.submit();
+                document.body.removeChild(form);
+              } catch (error) {
+                console.error('Error downloading syllabus:', error);
+                alert(`Error downloading syllabus: ${error.message}`);
+              }
+            }}
+            className={`flex items-center justify-center gap-3 bg-blue-600 text-white px-6 py-4 rounded-lg font-semibold shadow-lg hover:bg-blue-700 transition-all transform hover:-translate-y-1 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-blue-300 ${
+              !selectedClass ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+            disabled={!selectedClass}
+          >
+            <FaFileDownload size={18} />
+            Download Syllabus
+          </button>
         </div>
         
         <p className="mt-4 text-sm text-gray-500">
@@ -118,6 +125,45 @@ const Academics = () => {
             </li>
           ))}
         </ul>
+      </section>
+
+      {/* Teachers Section */}
+      <section className="max-w-6xl mx-auto mt-16">
+        <h2 className="text-3xl font-bold text-blue-800 mb-8 text-center">Our Dedicated Teachers</h2>
+        {teachersLoading ? (
+          <p className="text-center text-gray-600">Loading teachers...</p>
+        ) : teachers.length === 0 ? (
+          <p className="text-center text-gray-600">Teacher profiles will appear here soon.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {teachers.map((t) => {
+              const photoUrl = t.photoFileId
+                ? `${axiosInstance.defaults.baseURL?.replace(/\/api$/, '') || ''}/api/public/teachers/photo/${t.photoFileId}`
+                : null;
+              return (
+                <div key={t._id} className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100">
+                  <div className="h-48 bg-gray-100">
+                    {photoUrl ? (
+                      <img src={photoUrl} alt={t.name} className="w-full h-48 object-cover" />
+                    ) : (
+                      <div className="w-full h-48 flex items-center justify-center text-gray-400">No Photo</div>
+                    )}
+                  </div>
+                  <div className="p-5">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-1">{t.name}</h3>
+                    {(t.degrees?.length ?? 0) > 0 && (
+                      <p className="text-sm text-blue-700 mb-2">{t.degrees.join(', ')}</p>
+                    )}
+                    <p className="text-sm text-gray-700 mb-2"><span className="font-medium">Experience:</span> {t.experience ?? 0} years</p>
+                    {(t.subjects?.length ?? 0) > 0 && (
+                      <p className="text-sm text-gray-700"><span className="font-medium">Subjects:</span> {t.subjects.join(', ')}</p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* Academic Highlights Section */}
