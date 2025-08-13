@@ -70,7 +70,8 @@ const Academics = () => {
               e.preventDefault();
               if (!selectedClass) return;
               try {
-                const apiUrl = `http://localhost:3000/api/public/syllabus/class/${selectedClass}/term/1`;
+                const base = process.env.REACT_APP_API_URL || '';
+                const apiUrl = `${base}/api/public/syllabus/class/${selectedClass}/term/1`;
                 // Direct open
                 window.open(apiUrl, '_blank');
                 // Fallback form submit

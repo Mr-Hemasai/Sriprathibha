@@ -15,35 +15,32 @@ const teachersPublicRoutes = require('./routes/teachers');
 
 const app = express();
 
-// Configure CORS with permissive settings for development
+// Configure CORS for local, Render, and Vercel via env
+const allowedOrigins = new Set([
+  'http://localhost:3001',
+  'http://localhost:3000',
+  process.env.CLIENT_ORIGIN,
+  process.env.CLIENT_ORIGIN_2,
+  process.env.CLIENT_ORIGIN_3,
+].filter(Boolean));
+
 const corsOptions = {
-  origin: ['http://localhost:3001', 'http://localhost:3000'],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g., mobile apps, curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.has(origin)) return callback(null, true);
+    return callback(new Error('CORS blocked'));
+  },
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
 };
 
 // Apply CORS middleware with the specified options
 app.use(cors(corsOptions));
-
-// Handle preflight requests
+// Handle preflight requests for all routes
 app.options('*', cors(corsOptions));
-
-// Add headers before the routes are defined
-app.use(function (req, res, next) {
-  // Website you wish to allow to connect
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3001');
-  // Request methods you wish to allow
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-  // Request headers you wish to allow
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type,authorization');
-  // Set to true if you need the website to include cookies in the requests sent
-  // to the API (e.g. in case you use sessions)
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  // Pass to next layer of middleware
-  next();
-});
 
 // Parse JSON bodies
 app.use(express.json({ 

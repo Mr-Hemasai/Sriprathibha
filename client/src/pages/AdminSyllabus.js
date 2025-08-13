@@ -371,7 +371,8 @@ const AdminSyllabus = () => {
                         <button
                           onClick={(e) => {
                             e.preventDefault();
-                            window.open(`/api/admin/syllabus/file/${syllabus.fileId}`, '_blank');
+                            const base = process.env.REACT_APP_API_URL || '';
+                            window.open(`${base}/api/admin/syllabus/file/${syllabus.fileId}`, '_blank');
                           }}
                           className="text-blue-600 hover:text-blue-800"
                         >
