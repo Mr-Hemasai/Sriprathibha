@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   FaTachometerAlt, FaUsers, FaBook,
-  FaCalendarAlt, FaSignOutAlt, FaRegUserCircle, FaBars, FaUserGraduate
+  FaCalendarAlt, FaSignOutAlt, FaRegUserCircle, FaBars, FaUserGraduate, FaImages
 } from 'react-icons/fa';
 import { AuthContext } from '../contexts/AuthContext';
 
@@ -26,6 +26,7 @@ const AdminLayout = () => {
     { title: 'Syllabus', path: '/admin/syllabus', icon: <FaBook /> },
     { title: 'Events', path: '/admin/events', icon: <FaCalendarAlt /> },
     { title: 'Teachers', path: '/admin/teachers', icon: <FaUsers /> },
+    { title: 'Gallery', path: '/admin/gallery', icon: <FaImages /> },
     { title: 'Applications', path: '/admin/applications', icon: <FaUserGraduate /> },
     { title: 'Contacts', path: '/admin/contacts', icon: <FaUsers /> },
   ];

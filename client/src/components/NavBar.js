@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FiMenu, FiX, FiUserPlus, FiBook, FiCalendar, FiPhone } from 'react-icons/fi';
+import { FiMenu, FiX, FiUserPlus, FiBook, FiCalendar, FiPhone, FiImage } from 'react-icons/fi';
 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,6 +12,7 @@ const NavBar = () => {
     { path: '/admissions', label: 'Admissions', icon: FiUserPlus },
     { path: '/academics', label: 'Academics', icon: FiBook },
     { path: '/events', label: 'Events', icon: FiCalendar },
+    { path: '/gallery', label: 'Gallery', icon: FiImage },
     { path: '/contact', label: 'Contact', icon: FiPhone },
   ];
 

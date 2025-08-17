@@ -18,6 +18,8 @@ import AdminEvents from './pages/AdminEvents';
 import AdminApplications from './pages/AdminApplications';
 import AdminContacts from './pages/AdminContacts';
 import AdminTeachers from './pages/AdminTeachers';
+import Gallery from './pages/Gallery';
+import AdminGallery from './pages/AdminGallery';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -59,6 +61,7 @@ function App() {
             <Route path="applications" element={<AdminApplications />} />
             <Route path="contacts" element={<AdminContacts />} />
             <Route path="teachers" element={<AdminTeachers />} />
+            <Route path="gallery" element={<AdminGallery />} />
           </Route>
 
           {/* Public Routes */}
@@ -75,6 +78,7 @@ function App() {
             <Route path="admissions" element={<Admissions />} />
             <Route path="events" element={<Events />} />
             <Route path="events/:id" element={<EventDetail />} />
+            <Route path="gallery" element={<Gallery />} />
             <Route path="contact" element={<Contact />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>

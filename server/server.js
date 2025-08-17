@@ -12,6 +12,7 @@ const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const publicRoutes = require('./routes/public');
 const teachersPublicRoutes = require('./routes/teachers');
+const galleryRoutes = require('./routes/gallery');
 
 const app = express();
 
@@ -152,6 +153,7 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/public', publicRoutes); // Public routes (no auth required)
 app.use('/api/public/teachers', teachersPublicRoutes); // Public teachers routes
+app.use('/api/gallery', galleryRoutes); // Public gallery routes
 
 // Apply auth middleware to all admin routes
 app.use('/api/admin', (req, res, next) => {

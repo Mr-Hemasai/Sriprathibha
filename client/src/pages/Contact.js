@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import api from '../api/axiosInstance';
-import { FaEnvelope, FaPhoneAlt, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaEnvelope, FaPhoneAlt, FaMapMarkerAlt, FaUserTie } from 'react-icons/fa';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -12,12 +12,30 @@ const Contact = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [principal, setPrincipal] = useState(null);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError('');
     setSuccess('');
   };
+
+  // Load principal from teachers API
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await api.get('/public/teachers');
+        const data = Array.isArray(res.data?.data) ? res.data.data : [];
+        // Find principal by tag (normalized to lowercase)
+        const p = data.find(t => (t.tag || '').toLowerCase() === 'principal');
+        if (mounted) setPrincipal(p || null);
+      } catch (e) {
+        console.error('Failed to load principal', e);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -110,6 +128,35 @@ const Contact = () => {
               <a href="mailto:info@sriprathibha.edu.in" className="hover:underline">info@sriprathibha.edu.in</a>
             </div>
           </div>
+
+          {principal && (
+            <div className="mt-8 p-5 border border-blue-100 rounded-lg bg-blue-50/50">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 flex items-center justify-center rounded-full bg-blue-600 text-white">
+                  <FaUserTie className="text-xl" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-xl font-semibold text-blue-900">{principal.name}</h3>
+                    <span className="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 uppercase tracking-wide">Principal</span>
+                  </div>
+                  {principal.contactNumber && (
+                    <div className="mt-1 text-blue-700">
+                      <a href={`tel:${principal.contactNumber}`} className="hover:underline flex items-center gap-2">
+                        <FaPhoneAlt />
+                        <span>{principal.contactNumber}</span>
+                      </a>
+                    </div>
+                  )}
+                  {Array.isArray(principal.degrees) && principal.degrees.length > 0 && (
+                    <div className="mt-1 text-sm text-blue-700/80">
+                      {principal.degrees.join(', ')}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
     </div>

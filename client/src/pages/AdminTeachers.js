@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { FaPlus, FaEdit, FaTrash, FaCamera } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import axiosInstance from '../api/axiosInstance';
 
 const emptyForm = {
@@ -8,7 +8,8 @@ const emptyForm = {
   degrees: '', // comma-separated in UI
   experience: '',
   subjects: '', // comma-separated in UI
-  photo: null,
+  contactNumber: '',
+  tag: '', // principal, vice_principal, senior_teacher, etc.
 };
 
 const AdminTeachers = () => {
@@ -34,7 +35,28 @@ const AdminTeachers = () => {
     try {
       setLoading(true);
       const res = await axiosInstance.get('/public/teachers');
-      setTeachers(res.data?.data || []);
+      const data = Array.isArray(res.data?.data) ? res.data.data : [];
+      const tagOrder = [
+        'principal',
+        'vice_principal',
+        'hod',
+        'coordinator',
+        'senior_teacher',
+        'teacher',
+        'assistant_teacher',
+        '',
+      ];
+      const rank = (t) => {
+        const idx = tagOrder.indexOf((t.tag || '').toString().toLowerCase());
+        return idx >= 0 ? idx : 999;
+      };
+      data.sort((a, b) => {
+        const ra = rank(a);
+        const rb = rank(b);
+        if (ra !== rb) return ra - rb;
+        return (a.name || '').localeCompare(b.name || '');
+      });
+      setTeachers(data);
     } catch (e) {
       console.error('Failed to load teachers', e);
       const msg = e?.message || 'Failed to load teachers';
@@ -54,22 +76,20 @@ const AdminTeachers = () => {
     try {
       setSaving(true);
       setError('');
-      const fd = new FormData();
-      if (form.name) fd.append('name', form.name);
-      if (form.degrees) fd.append('degrees', form.degrees);
-      if (form.experience !== '') fd.append('experience', form.experience);
-      if (form.subjects) fd.append('subjects', form.subjects);
-      if (form.photo instanceof File) fd.append('photo', form.photo);
+      const payload = {
+        name: (form.name || '').trim(),
+        degrees: (form.degrees || '').trim(),
+        experience: String(form.experience ?? '').trim(),
+        subjects: (form.subjects || '').trim(),
+        contactNumber: (form.contactNumber || '').trim(),
+        tag: (form.tag || '').trim().toLowerCase(),
+      };
 
       if (editingId) {
-        await axiosInstance.put(`/admin/teachers/${editingId}`, fd, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
+        await axiosInstance.put(`/admin/teachers/${editingId}`, payload);
         toast.success('Teacher updated successfully');
       } else {
-        await axiosInstance.post('/admin/teachers', fd, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
+        await axiosInstance.post('/admin/teachers', payload);
         toast.success('Teacher created successfully');
       }
       await loadTeachers();
@@ -91,7 +111,8 @@ const AdminTeachers = () => {
       degrees: (t.degrees || []).join(', '),
       experience: String(t.experience ?? ''),
       subjects: (t.subjects || []).join(', '),
-      photo: null,
+      contactNumber: t.contactNumber || '',
+      tag: t.tag || '',
     });
     setShowForm(true);
   };
@@ -118,10 +139,7 @@ const AdminTeachers = () => {
     }
   };
 
-  const photoUrl = (t) =>
-    t.photoFileId
-      ? `${axiosInstance.defaults.baseURL?.replace(/\/api$/, '') || ''}/api/public/teachers/photo/${t.photoFileId}`
-      : null;
+  // No photo now
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -150,37 +168,33 @@ const AdminTeachers = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Photo</th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Degrees</th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Experience</th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Subjects</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Contact</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Tag</th>
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-6 text-center text-gray-500">Loading...</td>
+                    <td colSpan={7} className="px-4 py-6 text-center text-gray-500">Loading...</td>
                   </tr>
                 ) : teachers.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-6 text-center text-gray-500">No teachers found</td>
+                    <td colSpan={7} className="px-4 py-6 text-center text-gray-500">No teachers found</td>
                   </tr>
                 ) : (
                   teachers.map((t) => (
                     <tr key={t._id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3">
-                        {photoUrl(t) ? (
-                          <img src={photoUrl(t)} alt={t.name} className="h-12 w-12 rounded-full object-cover" />
-                        ) : (
-                          <div className="h-12 w-12 rounded-full bg-gray-200" />)
-                        }
-                      </td>
                       <td className="px-4 py-3 font-medium text-gray-900">{t.name}</td>
                       <td className="px-4 py-3 text-gray-700">{(t.degrees || []).join(', ')}</td>
                       <td className="px-4 py-3 text-gray-700">{t.experience ?? 0} yrs</td>
                       <td className="px-4 py-3 text-gray-700">{(t.subjects || []).join(', ')}</td>
+                      <td className="px-4 py-3 text-gray-700">{t.contactNumber || '-'}</td>
+                      <td className="px-4 py-3 text-gray-700">{(t.tag || '').replace(/_/g, ' ') || '-'}</td>
                       <td className="px-4 py-3 text-right">
                         <div className="inline-flex gap-2">
                           <button
@@ -257,20 +271,33 @@ const AdminTeachers = () => {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Photo</label>
-                  <label className="flex items-center gap-3 px-3 py-2 border border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                    <FaCamera className="text-gray-500" />
-                    <span className="text-sm text-gray-600">
-                      {form.photo?.name || 'Choose an image (JPG/PNG, up to 5MB)'}
-                    </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
                     <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => setForm((f) => ({ ...f, photo: e.target.files?.[0] || null }))}
+                      type="tel"
+                      value={form.contactNumber}
+                      onChange={(e) => setForm((f) => ({ ...f, contactNumber: e.target.value }))}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
-                  </label>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Tag</label>
+                    <select
+                      value={form.tag}
+                      onChange={(e) => setForm((f) => ({ ...f, tag: e.target.value }))}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">None</option>
+                      <option value="principal">Principal</option>
+                      <option value="vice_principal">Vice Principal</option>
+                      <option value="senior_teacher">Senior Teacher</option>
+                      <option value="teacher">Teacher</option>
+                      <option value="assistant_teacher">Assistant Teacher</option>
+                      <option value="hod">HOD</option>
+                      <option value="coordinator">Coordinator</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div className="pt-2 flex items-center justify-end gap-2">

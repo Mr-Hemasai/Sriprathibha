@@ -12,7 +12,28 @@ const Academics = () => {
       try {
         setTeachersLoading(true);
         const res = await axiosInstance.get('/public/teachers');
-        setTeachers(res.data?.data || []);
+        const data = Array.isArray(res.data?.data) ? res.data.data : [];
+        const tagOrder = [
+          'principal',
+          'vice_principal',
+          'hod',
+          'coordinator',
+          'senior_teacher',
+          'teacher',
+          'assistant_teacher',
+          '',
+        ];
+        const rank = (t) => {
+          const idx = tagOrder.indexOf((t.tag || '').toString().toLowerCase());
+          return idx >= 0 ? idx : 999;
+        };
+        data.sort((a, b) => {
+          const ra = rank(a);
+          const rb = rank(b);
+          if (ra !== rb) return ra - rb;
+          return (a.name || '').localeCompare(b.name || '');
+        });
+        setTeachers(data);
       } catch (e) {
         console.error('Failed to load teachers', e);
       } finally {
@@ -36,7 +57,7 @@ const Academics = () => {
 
       {/* Class-wise Syllabus Section */}
       <section className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-8 md:p-12 mb-16">
-        <h2 className="text-2xl font-bold text-blue-800 mb-6">Class-wise Syllabus</h2>
+        <h2 className="text-2xl font-bold text-blue-800 mb-6">Class-wise Syllabus & Timetables</h2>
         <p className="mb-8 text-gray-700">
           Select your class to download the corresponding syllabus. Our comprehensive curriculum is designed to meet educational standards and foster holistic development.
         </p>
@@ -93,7 +114,7 @@ const Academics = () => {
             disabled={!selectedClass}
           >
             <FaFileDownload size={18} />
-            Download Syllabus
+            Download 
           </button>
         </div>
         
@@ -137,32 +158,30 @@ const Academics = () => {
           <p className="text-center text-gray-600">Teacher profiles will appear here soon.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {teachers.map((t) => {
-              const photoUrl = t.photoFileId
-                ? `${axiosInstance.defaults.baseURL?.replace(/\/api$/, '') || ''}/api/public/teachers/photo/${t.photoFileId}`
-                : null;
-              return (
-                <div key={t._id} className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100">
-                  <div className="h-48 bg-gray-100">
-                    {photoUrl ? (
-                      <img src={photoUrl} alt={t.name} className="w-full h-48 object-cover" />
-                    ) : (
-                      <div className="w-full h-48 flex items-center justify-center text-gray-400">No Photo</div>
+            {teachers.map((t) => (
+              <div key={t._id} className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100">
+                <div className="p-5">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-xl font-semibold text-gray-900">{t.name}</h3>
+                    {(t.tag || '') && (
+                      <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700 capitalize">
+                        {(t.tag || '').replace(/_/g, ' ')}
+                      </span>
                     )}
                   </div>
-                  <div className="p-5">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-1">{t.name}</h3>
-                    {(t.degrees?.length ?? 0) > 0 && (
-                      <p className="text-sm text-blue-700 mb-2">{t.degrees.join(', ')}</p>
-                    )}
-                    <p className="text-sm text-gray-700 mb-2"><span className="font-medium">Experience:</span> {t.experience ?? 0} years</p>
-                    {(t.subjects?.length ?? 0) > 0 && (
-                      <p className="text-sm text-gray-700"><span className="font-medium">Subjects:</span> {t.subjects.join(', ')}</p>
-                    )}
-                  </div>
+                  {(t.degrees?.length ?? 0) > 0 && (
+                    <p className="text-sm text-blue-700 mb-2">{t.degrees.join(', ')}</p>
+                  )}
+                  <p className="text-sm text-gray-700 mb-2"><span className="font-medium">Experience:</span> {t.experience ?? 0} years</p>
+                  {(t.subjects?.length ?? 0) > 0 && (
+                    <p className="text-sm text-gray-700"><span className="font-medium">Subjects:</span> {t.subjects.join(', ')}</p>
+                  )}
+                  {(t.contactNumber || '') && (
+                    <p className="text-sm text-gray-700 mt-2"><span className="font-medium">Contact:</span> {t.contactNumber}</p>
+                  )}
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         )}
       </section>

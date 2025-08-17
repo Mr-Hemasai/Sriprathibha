@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axiosInstance';
 import { FaCalendarAlt, FaMapMarkerAlt, FaClock, FaArrowLeft } from 'react-icons/fa';
 import { format, parseISO } from 'date-fns';
 
@@ -14,13 +14,7 @@ const EventDetail = () => {
     const fetchEvent = async () => {
       try {
         console.log('Fetching event with ID:', id);
-        const response = await axios.get(`http://localhost:3000/api/events/${id}`, {
-          withCredentials: true,
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
-        });
+        const response = await api.get(`/events/${id}`);
         console.log('Event data received:', response.data);
         
         if (response.data.data) {

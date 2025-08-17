@@ -6,9 +6,14 @@ const TeacherSchema = new mongoose.Schema(
     degrees: { type: [String], default: [] },
     experience: { type: Number, default: 0 }, // years
     subjects: { type: [String], default: [] },
-    photoFileId: { type: mongoose.Schema.Types.ObjectId, ref: 'fs.files', default: null },
-    photoOriginalName: { type: String, default: null },
-    photoMimeType: { type: String, default: null },
+    contactNumber: { type: String, trim: true, default: '' },
+    tag: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      enum: ['principal', 'vice_principal', 'senior_teacher', 'teacher', 'assistant_teacher', 'hod', 'coordinator', ''],
+      default: '',
+    },
     createdBy: { type: String },
   },
   { timestamps: true }
