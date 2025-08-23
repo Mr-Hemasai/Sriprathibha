@@ -40,7 +40,7 @@ const NavBar = () => {
   };
 
   return (
-    <header className="sticky top-0 bg-white shadow-lg z-50 border-b border-blue-200">
+    <header className="sticky top-0 bg-white shadow-lg z-[60] border-b border-blue-200" style={{minHeight: '72px'}}>
       <nav className="max-w-[1200px] mx-auto flex items-center justify-between px-6 py-4" aria-label="Main navigation">
         {/* Logo Section */}
         <div className="flex items-center space-x-4 hover:opacity-90 transition duration-300">
@@ -49,9 +49,9 @@ const NavBar = () => {
             alt="Sri Prathibha Model High School Logo"
             className="h-14 w-14 rounded-lg shadow-md"
           />
-          <Link to="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold text-blue-600">Sri Prathibha</span>
-            <span className="text-sm text-gray-600">Model High School</span>
+          <Link to="/" className="flex flex-col items-start justify-center min-w-[140px]">
+            <span className="text-2xl font-bold text-blue-600 leading-tight">Sri Prathibha</span>
+            <span className="text-sm text-gray-600 leading-tight">Model High School</span>
           </Link>
         </div>
         
@@ -84,7 +84,7 @@ const NavBar = () => {
 
         {/* Mobile Menu */}
         {isOpen && (
-          <div className="md:hidden absolute top-full left-0 w-full bg-white shadow-lg border-t border-blue-200">
+          <div className="md:hidden fixed top-[72px] left-0 w-full bg-white shadow-lg border-t border-blue-200 z-[70]">
             <div className="px-6 py-4 space-y-4">
               <ul>
                 {navItems.map(renderNavItem)}
