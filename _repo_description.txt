@@ -1,0 +1,1 @@
+Sri Prathibha Model High School Management System - Comprehensive school management platform with admin dashboard, student admissions portal, event management, contact tracking, and animated UI built with React and Node.js.
